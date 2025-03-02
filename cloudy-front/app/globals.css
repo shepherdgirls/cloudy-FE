@@ -19,3 +19,9 @@ body {
   background: var(--background);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* active css */
+.nav-link.active {
+  color: blue; /* Active 상태일 때 색상 */
+  font-weight: bold; /* Active 상태일 때 굵기 */
+}
