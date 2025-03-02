@@ -1,9 +1,10 @@
 // app/home/page.js
 'use client';
 import Navbar from '../components/Navbar';
+import { useEffect, useRef } from 'react';
 import Image from 'next/image';
 import mainImage from '../../public/images/mainImage.svg';
-import { useEffect, useRef } from 'react';
+import Link from 'next/link';
 
 export default function NewHomePage() {
     const handleScrollRef = useRef(null);
@@ -86,12 +87,11 @@ export default function NewHomePage() {
                                     AWS와 Terraform을 활용한 자동화된 인프라 구축 서비스
                                 </p>
                                 <div className='flex justify-center md:justify-start space-x-4'>
-                                    <button className="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-full">
-                                        SNS 로그인
-                                    </button>
-                                    <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full">
-                                        회원가입
-                                    </button>
+                                    <Link href="/login">
+                                        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full">
+                                            시작하기
+                                        </button>
+                                    </Link>
                                 </div>
                             </div>
                             <div className=''>
@@ -113,15 +113,15 @@ export default function NewHomePage() {
                         </p>
                         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 px-4 md:px-16'>
                             <div className='bg-gray-100 rounded-lg p-6'>
-                                <h3 className='text-xl font-semibold mb-4'>간편한 설정</h3>
+                                <h3 className='text-xl font-semibold mb-4'>💡간편한 설정</h3>
                                 <p className='text-gray-600'>몇 번의 클릭만으로 배포 가능</p>
                             </div>
                             <div className='bg-gray-100 rounded-lg p-6'>
-                                <h3 className='text-xl font-semibold mb-4'>자동화된 배포</h3>
+                                <h3 className='text-xl font-semibold mb-4'>⚒️자동화된 배포</h3>
                                 <p className='text-gray-600'>Terraform을 활용한 Infrastructure as Code (IaC)</p>
                             </div>
                             <div className='bg-gray-100 rounded-lg p-6'>
-                                <h3 className='text-xl font-semibold mb-4'>최적화된 환경</h3>
+                                <h3 className='text-xl font-semibold mb-4'>⚙️최적화된 환경</h3>
                                 <p className='text-gray-600'>보안 및 비용을 고려한 클라우드 구성</p>
                             </div>
                         </div>
@@ -132,10 +132,10 @@ export default function NewHomePage() {
                 <section id="users" className="bg-gray-100 py-24 text-center">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8">
-                        누가 <span className='text-blue-500'>CLOUD-CLOUDY</span>를 사용할까요?
+                            누가 <span className='text-blue-500'>CLOUD-CLOUDY</span>를 사용할까요?
                         </h2>
                         <p className="text-gray-600 px-4 md:px-16 text-lg">
-                           <span className='text-blue-500'>CLOUD-CLOUDY</span>는 이런 분들을 위한 서비스입니다.
+                            <span className='text-blue-500'>CLOUD-CLOUDY</span>는 이런 분들을 위한 서비스입니다.
                         </p>
                         <div className='grid grid-cols-1 md:grid-cols-3 gap-8 px-4 md:px-16 mt-8'>
                             <div className='bg-white rounded-lg p-6'>
@@ -155,26 +155,44 @@ export default function NewHomePage() {
                 </section>
 
                 {/* 4. GUIDE (이용 가이드 섹션) */}
-                <section id="guide" className="py-24 text-center">
+                <section id="guide" className="py-24 bg-gradient-to-r from-blue-50 to-white text-center">
                     <div className="container mx-auto px-4">
                         <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-8">
                             간단한 3단계로 클라우드 배포 완료!
                         </h2>
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-16 px-4 md:px-16">
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <h3 className="text-xl font-semibold mb-4">Step 1</h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 px-4 md:px-16">
+                            {/* Step 1 */}
+                            <div className="bg-gradient-to-r from-blue-100 to-blue-200 rounded-lg shadow-lg p-8 hover:scale-105 transition-transform">
+                                <div className="flex justify-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 4a2 2 0 012-2h14a2 2 0 012 2v16a2 2 0 01-2 2H5a2 2 0 01-2-2V4z" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-semibold mb-4 text-blue-800">Step 1</h3>
                                 <p className="text-gray-700 text-lg">프로젝트 생성 → GitHub 연동 및 AWS 설정</p>
                             </div>
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <h3 className="text-xl font-semibold mb-4">Step 2</h3>
-                                <p className="text-gray-700 text-lg">아키텍처 선택 → a, b, c 등 원하는 환경 선택</p>
+                            {/* Step 2 */}
+                            <div className="bg-gradient-to-r from-green-100 to-green-200 rounded-lg shadow-lg p-8 hover:scale-105 transition-transform">
+                                <div className="flex justify-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-semibold mb-4 text-green-800">Step 2</h3>
+                                <p className="text-gray-700 text-lg">아키텍처 선택 → 원하는 환경 선택 (a, b, c 등)</p>
                             </div>
-                            <div className="bg-white rounded-lg shadow-md p-6">
-                                <h3 className="text-xl font-semibold mb-4">Step 3</h3>
+                            {/* Step 3 */}
+                            <div className="bg-gradient-to-r from-orange-100 to-orange-200 rounded-lg shadow-lg p-8 hover:scale-105 transition-transform">
+                                <div className="flex justify-center mb-4">
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </div>
+                                <h3 className="text-xl font-semibold mb-4 text-orange-800">Step 3</h3>
                                 <p className="text-gray-700 text-lg">배포 실행 → Terraform을 활용한 자동화 배포 진행</p>
                             </div>
                         </div>
-                        <a href="#" className='mt-8 inline-block text-blue-500 hover:underline'>🔗 자세한 가이드 보기</a>
+                        <a href="#" className="mt-8 inline-block text-blue-500 hover:underline text-xl font-semibold">🔗 자세한 가이드 보기</a>
                     </div>
                 </section>
 
@@ -198,11 +216,11 @@ export default function NewHomePage() {
                     </div>
                 </section>
                 {/* 6. 푸터 (Footer) */}
-                <footer id="footer" className="bg-gray-800 text-white py-12 text-center">
+                <footer id="footer" className="bg-gray-800 text-white py-4 text-center">
                     <div className="container mx-auto px-4">
                         <h2 className='text-2xl font-bold mb-4'>문의하기</h2>
-                        <p className='mb-8'>✉️ support@shepherdgirls.com</p>
-                        <p className='mb-8'>📍 123 New York, USA</p>
+                        <p className='mb-4'>✉️ support@shepherdgirls.com</p>
+                        <p className='mb-4'>📍 123 New York, USA</p>
 
                         <h2 className='text-2xl font-bold mb-4'>Follow us</h2>
                         <div className='flex justify-center space-x-4 mb-8'>
