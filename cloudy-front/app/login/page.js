@@ -12,34 +12,46 @@ export default function LoginPage() {
     };
 
     useEffect(() => {
-         // GitHub OAuth URL (백엔드에서 제공해야 함)
-         const githubAuthUrl = 'http://localhost:8000/auth/github/login'; // 예시 URL, 실제 주소로 변경해야 합니다.
+        const fetchToken = async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const code = urlParams.get('code');
 
-         // GitHub OAuth 로그인 창 열기
-        const urlParams = new URLSearchParams(window.location.search);
-        const code = urlParams.get('code');
-        if(code){
-            const result = fetch(`http://localhost:8000/auth/github/callback?code=${code}`,{
-                method : 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            }).then((res) => {
-                if(!res.ok){
-                    throw new Error('Network response was not ok');
-                }
-                return res.json();
-            }).then((data) => {
-                if(data.token){
-                    console.log('success');
-                    // 로컬 스토리지에 토큰 저장
-                    localStorage.setItem('token', data.token);
-                    window.location.href = '/';
-                }
-            }).catch((err) => console.log('err'));
-        }
-    },[])
+            if (code) {
+                try {
+                    const response = await fetch(`http://localhost:8000/auth/github/callback?code=${code}`, {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    });
 
+                    if (!response.ok) {
+                         localStorage.removeItem('token');
+                         window.location.href = '/login';
+                         throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+
+                    if (data.token) {
+                        console.log('success');
+                        localStorage.setItem('token', data.token);
+                        window.location.href = '/';
+                    } else {
+                         localStorage.removeItem('token');
+                        console.error('Token not received');
+                         window.location.href = '/login';
+                    }
+                } catch (error) {
+                     localStorage.removeItem('token');
+                    console.error('Failed to fetch token:', error);
+                     window.location.href = '/login';
+                }
+            }
+        };
+
+        fetchToken();
+    }, []);
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-gray-100">

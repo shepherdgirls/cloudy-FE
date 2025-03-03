@@ -1,14 +1,22 @@
 // app/home/page.js
 'use client';
 import Navbar from '../components/Navbar';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import mainImage from '../../public/images/mainImage.svg';
 import Link from 'next/link';
 
 export default function NewHomePage() {
     const handleScrollRef = useRef(null);
+    const [isLoggedIn, setIsLoggedIn] = useState(false); // 로그인 상태 관리
+
     useEffect(() => {
+        // 로컬 스토리지에서 토큰 확인 및 로그인 상태 업데이트
+        const token = localStorage.getItem('token');
+        if (token) {
+            setIsLoggedIn(true);
+        }
+
         if (typeof window !== 'undefined') {
             const smoothScrollLinks = document.querySelectorAll('.smoothscroll');
             const navLinks = document.querySelectorAll('.navbar-nav .nav-link');
@@ -20,16 +28,24 @@ export default function NewHomePage() {
                     e.preventDefault();
 
                     const targetId = this.getAttribute('href');
-                    if (targetId === '#') {
-                        window.scrollTo({ top: 0, behavior: 'smooth' });
-                    }
-                    else {
-                        const targetElement = document.querySelector(targetId);
-                        if (targetElement) {
-                            const headerHeight = navbar ? navbar.offsetHeight : 0;
-                            const targetPosition = targetElement.offsetTop - headerHeight;
-                            window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+
+                    // targetId가 유효한지 검증
+                    if (targetId === '#' || targetId.startsWith('#')) {
+                        if (targetId === '#') {
+                            window.scrollTo({ top: 0, behavior: 'smooth' });
                         }
+                        else {
+                            const targetElement = document.querySelector(targetId);
+                            if (targetElement) {
+                                const headerHeight = navbar ? navbar.offsetHeight : 0;
+                                const targetPosition = targetElement.offsetTop - headerHeight;
+                                window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                            }
+                        }
+                    } else {
+                        console.error(`Invalid href attribute: ${targetId}`);
+                        //유효하지 않은 타겟 아이디에 대한 처리를 진행할 수 있습니다.
+                        //예를 들어, 사용자에게 오류를 알리는 메시지를 표시하거나, 아무 동작도 하지 않도록 할 수 있습니다.
                     }
                 });
             });
@@ -185,7 +201,7 @@ export default function NewHomePage() {
                             <div className="bg-gradient-to-r from-orange-100 to-orange-200 rounded-lg shadow-lg p-8 hover:scale-105 transition-transform">
                                 <div className="flex justify-center mb-4">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
                                 <h3 className="text-xl font-semibold mb-4 text-orange-800">Step 3</h3>
