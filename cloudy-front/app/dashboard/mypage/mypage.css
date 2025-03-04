@@ -1,9 +1,24 @@
-.user-box{
+.mypage {
+    display: flex;
+    flex-direction: column; /* 세로로 배치 */
+    gap: 30px; /* 각 섹션 간의 간격 */
+}
+
+/* user-info와 account를 세로로 나누기 위한 스타일 */
+.user-info,
+.account {
+    width: 100%; /* 100% 너비 */
+    flex: 1; /* 세로 공간을 균등하게 나누기 */
+}
+
+/* 기본 정보 박스 스타일 */
+.user-box {
     width: 100%;
-    height: 100wh;
+    height: 100wh; /* 화면 높이에 맞게 */
     border-radius: 10px;
     padding: 30px;
     border: 2px solid lightgrey;
+    box-sizing: border-box;
 }
 
 button {
@@ -29,51 +44,83 @@ button {
     gap: 10px; /* 버튼 사이 간격 */
 }
 
-.mypage h1{
+.mypage h1 {
     font-weight: bold;
-    font-size: 30px
+    font-size: 30px;
 }
 
-.mypage h2{
-    font-size: 20px
+.mypage h2 {
+    font-size: 20px;
 }
 
 .modal-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background-color: rgba(0, 0, 0, 0.5);
     display: flex;
     justify-content: center;
     align-items: center;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* 반투명 배경 */
+    z-index: 1000; /* 모달을 가장 위에 표시 */
 }
+
 .modal {
     background-color: white;
     padding: 20px;
     border-radius: 8px;
-    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    width: 400px; /* 원하는 너비로 설정 */
+    max-width: 90%; /* 화면 크기에 따라 최대 90% */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 20px;
+}
+
 .modal button {
-    margin: 10px;
-    padding: 8px 16px;
-    border: none;
-    background-color: #007bff;
-    color: white;
-    border-radius: 5px;
-    cursor: pointer;
+    display: block; /* 버튼을 블록 요소로 설정 */
+    margin: 0 auto; /* 수평 중앙 정렬 */
 }
 
-.modal .close{
-    height: 30px;
-    width: 30px;
-    font-size: 15px;
-    text-align: center;
-    border-radius: 50%;
+/* 계정 연결 부분 스타일 */
+.account {
+    margin-top: 20px;
 }
 
-.form input{
-    margin-left: 15px;
-    border: 1px solid grey
+.account-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr); /* 두 열로 나누기 */
+    gap: 20px; /* 박스 간 간격 */
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 20px;
+}
+
+.account-box {
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #ffffff;
+    height: auto;
+    box-sizing: border-box;
+}
+
+.box p {
+    margin: 10px 0;
+    font-size: 14px;
+    color: #333;
+}
+
+.account-header {
+    display: flex; /* 버튼을 일렬로 배치 */
+    justify-content: space-between;
+    gap: 10px; /* 버튼 간 간격 */
+    margin-bottom: 20px; /* 아래쪽 여백 */
 }

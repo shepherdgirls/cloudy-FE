@@ -10,16 +10,18 @@
     background: white;
     color: black;
     padding: 15px 20px;
-    text-align: left;
     position: fixed;
     top: 0;
     left: 0;
     height: 60px;
     z-index: 1000;
     border-bottom: 2px solid lightgrey;
+    display: flex; /* 가로로 배치 */
+    flex-direction: row;
+    gap: 10px; /* 로고와 텍스트 간의 간격 */
   }
 
-   .header h1{
+   .header span{
     font-weight: bold;
     font-size: 20px;
    }
@@ -65,6 +67,7 @@
   
   /* 메인 콘텐츠 */
   .content {
+    margin-top: 60px;
     margin-left: 200px;
     padding: 20px;
     flex: 1;
