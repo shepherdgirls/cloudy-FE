@@ -6,7 +6,9 @@ export default function DashboardLayout(props) {
       <div className="layout">
         {/* 헤더 */}
         <header className="header">
-            <h1>Cloud-Cloudy</h1>
+            <Link href="/home">
+                <span>Cloud-Cloudy</span>
+            </Link>
         </header>
 
         {/* 사이드바 */}
@@ -14,9 +16,8 @@ export default function DashboardLayout(props) {
             <nav className="sidebar">
                 <div className="sidebar-top">
                     <ul className="menu">
-                        <li><Link href="/dashboard">Home</Link></li>
-                        <li><Link href="/dashboard/myProject">My Project</Link></li>
-                        <li><Link href="/dashboard/createProject">Create Project</Link></li>
+                        <li><Link href="/dashboard/myproject">My Project</Link></li>
+                        <li><Link href="/dashboard/createproject">Create Project</Link></li>
                         <li><Link href="/dashboard/security">Security</Link></li>
                     </ul>
                 </div>
