@@ -1,0 +1,146 @@
+/* 전체 레이아웃 */
+.layout {
+  display: flex;
+  flex-direction: column;
+}
+
+/* 헤더 스타일 */
+.header {
+  width: 100%;
+  background: white;
+  color: black;
+  padding: 15px 20px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 60px;
+  z-index: 1000;
+  border-bottom: 2px solid lightgrey;
+  display: flex;
+  /* 가로로 배치 */
+  flex-direction: row;
+  gap: 10px;
+  /* 로고와 텍스트 간의 간격 */
+}
+
+.header span {
+  font-weight: bold;
+  font-size: 20px;
+}
+
+/* 메인 컨테이너 */
+.container {
+  display: flex;
+  flex: 1;
+  margin-top: 0px;
+}
+
+/* 사이드바 스타일 */
+.sidebar {
+  width: 200px;
+  background: lightgrey;
+  color: black;
+  padding: 20px;
+  height: 100vh;
+  position: fixed;
+  left: 0;
+  top: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+/* 메뉴 스타일 */
+.menu {
+  list-style: none;
+  padding: 0;
+}
+
+/* ✅ 리스트 항목 간격 추가 */
+.menu li {
+  margin-bottom: 25px;
+}
+
+/* 하단 구분선 */
+.sidebar-bottom {
+  position: absolute;
+  bottom: 70px;
+}
+
+/* 메인 콘텐츠 */
+.content {
+  margin-top: 60px;
+  margin-left: 200px;
+  padding: 20px;
+  flex: 1;
+}
+
+/* ✅ 사용자 프로필 */
+.profile {
+  border-top: 1px solid #555;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 15px;
+  padding: 10px;
+}
+
+.profile-popup {
+  position: absolute;
+  bottom: 0; /* 부모 요소의 하단에 맞추기 */
+  left: 200px; /* 사이드바 너비만큼 밀기 */
+  height: 200px;
+  width: 400px;
+  background: white;
+  border: 1px solid #ccc;
+  padding: 20px;
+  animation: slideInFromLeft 0.3s ease-out;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  border-radius: 8px;
+  z-index: 999;
+}
+
+/* close-btn 스타일 */
+.profile-popup .close-btn {
+  position: absolute;
+  top: 10px; /* 상단에서 10px */
+  right: 10px; /* 오른쪽에서 10px */
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.user-info {
+  position: absolute;
+  top: 60%;
+  left: 20px; /* 이미지 위치 맞춤 */
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.user-info img {
+  margin-right: 10px; /* 이미지와 div 사이의 간격 */
+}
+
+.user-info div {
+  
+  display: flex;
+  flex-direction: column; /* div 내부 요소 세로로 정렬 */
+}
+
+.user-info div .logout-button {
+  padding: 10px 0px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  cursor: pointer;
+
+  /* 텍스트 길이에 맞게 너비 자동 */
+  width: fit-content;
+
+  /* 왼쪽 정렬 */
+  margin-left: 0;
+}
