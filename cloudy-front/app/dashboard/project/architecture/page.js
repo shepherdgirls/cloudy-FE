@@ -7,7 +7,7 @@ const architectures = [
 	{
 		key: "ec2-rds-alb",
 		title: "EC2 + RDS + ALB",
-		img: "/arch-ec2.png", // 실제 이미지 경로로 교체
+		//img: "/arch-ec2.png",
 		desc: (
 			<>
 				<span className="italic font-semibold">EC2 + RDS + ALB</span>
@@ -26,7 +26,7 @@ const architectures = [
 	{
 		key: "ec2-lambda",
 		title: "EC2 + Lambda",
-		img: "/arch-lambda.png",
+		//img: "/arch-lambda.png",
 		desc: (
 			<>
 				<span className="italic font-semibold">EC2 + Lambda</span>
@@ -45,7 +45,7 @@ const architectures = [
 	{
 		key: "s3-cloudfront",
 		title: "S3 + CloudFront",
-		img: "/arch-s3.png",
+		//img: "/arch-s3.png",
 		desc: (
 			<>
 				<span className="italic font-semibold">S3 + CloudFront</span>
@@ -69,41 +69,6 @@ export default function ArchitectureSelectPage() {
 
 	return (
 		<div className="flex min-h-screen bg-gray-50">
-			{/* 사이드바 (재사용) */}
-			<aside className="w-60 bg-white border-r p-6 flex flex-col justify-between">
-				<div>
-					<h2 className="text-xl font-bold mb-8">Cloud-Cloudy</h2>
-					<nav>
-						<ul className="space-y-4">
-							<li>
-								<a href="#" className="font-semibold">
-									Home
-								</a>
-							</li>
-							<li>
-								<a href="#">My Projects</a>
-							</li>
-							<li>
-								<a href="#">Create projects</a>
-							</li>
-							<li>
-								<a href="#">Security</a>
-							</li>
-						</ul>
-					</nav>
-				</div>
-				<div className="flex items-center space-x-2 mt-8">
-					<img
-						src="/avatar.png"
-						alt="avatar"
-						className="w-8 h-8 rounded-full"
-					/>
-					<div>
-						<p className="font-bold text-sm">Jenny Patron</p>
-						<p className="text-xs text-gray-500">jenny@gmail.com</p>
-					</div>
-				</div>
-			</aside>
 
 			{/* 메인 */}
 			<main className="flex-1 p-12">
@@ -116,7 +81,7 @@ export default function ArchitectureSelectPage() {
 				<div className="flex space-x-4 mb-8">
 					<button
 						className="flex items-center px-4 py-2 rounded-t bg-white border-b-2 border-blue-600 font-bold"
-						onClick={() => router.push("/project")}
+						onClick={() => router.push("/dashboard/project")}
 					>
 						환경설정{" "}
 						<span className="ml-2 bg-purple-100 text-purple-700 rounded-full px-2 text-xs">
@@ -125,7 +90,7 @@ export default function ArchitectureSelectPage() {
 					</button>
 					<button
 						className="flex items-center px-4 py-2 rounded-t bg-white border-b-2 border-blue-600 font-bold"
-						onClick={() => router.push("/project/architecture")}
+						onClick={() => router.push("/dashboard/project/architecture")}
 					>
 						아키텍처{" "}
 						<span className="ml-2 bg-purple-100 text-purple-700 rounded-full px-2 text-xs">
@@ -163,7 +128,7 @@ export default function ArchitectureSelectPage() {
 							type="button"
 						>
 							{/* 이미지 영역 */}
-							{arch.img ? (
+							{/*{arch.img ? (
 								<img
 									src={arch.img}
 									alt={arch.title}
@@ -172,7 +137,7 @@ export default function ArchitectureSelectPage() {
 							) : (
 								<div className="h-40 bg-gray-200 rounded mb-4"></div>
 							)}
-							<div className="text-lg mb-2">{arch.desc}</div>
+							<div className="text-lg mb-2">{arch.desc}</div>*/}
 						</button>
 					))}
 				</div>
@@ -180,11 +145,14 @@ export default function ArchitectureSelectPage() {
 				<div className="flex justify-between">
                     <button
                         className="px-8 py-3 rounded bg-white border font-bold"
-                        onClick={() => router.push("/project")}
+                        onClick={() => router.push("/dashboard/project")}
                     >
                         이전
                     </button>
-                    <button className="px-8 py-3 rounded bg-blue-600 text-white font-bold hover:bg-blue-700">
+                    <button 
+						className="px-8 py-3 rounded bg-blue-600 text-white font-bold hover:bg-blue-700"
+						onClick={() => router.push("/dashboard/project/custom")}
+					>
                         다음 단계
                     </button>
                 </div>

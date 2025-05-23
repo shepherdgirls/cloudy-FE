@@ -15,7 +15,7 @@ export default function LoginPage() {
             if (!code) return;
 
             try {
-                const response = await fetch('https://7336-222-110-177-102.ngrok-free.app/cloudy-auth/github/', {
+                const response = await fetch('https://42e0-58-79-8-251.ngrok-free.app/cloudy-auth/github/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -35,7 +35,7 @@ export default function LoginPage() {
                 if (data.tokens?.access && data.tokens?.refresh) {
                     localStorage.setItem('access', data.tokens.access);
                     localStorage.setItem('refresh', data.tokens.refresh);
-                    window.location.href = '/dashboard/mypage';
+                    window.location.href = '/dashboard';
                 } else {
                     localStorage.removeItem('access');
                     localStorage.removeItem('refresh');

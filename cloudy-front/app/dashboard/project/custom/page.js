@@ -90,27 +90,6 @@ provider "aws" {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* 사이드바 */}
-      <aside className="w-60 bg-white border-r p-6 flex flex-col justify-between">
-        <div>
-          <h2 className="text-xl font-bold mb-8">Cloud-Cloudy</h2>
-          <nav>
-            <ul className="space-y-4">
-              <li><a href="#" className="font-semibold">Home</a></li>
-              <li><a href="#">My Projects</a></li>
-              <li><a href="#">Create projects</a></li>
-              <li><a href="#">Security</a></li>
-            </ul>
-          </nav>
-        </div>
-        <div className="flex items-center space-x-2 mt-8">
-          <img src="/avatar.png" alt="avatar" className="w-8 h-8 rounded-full" />
-          <div>
-            <p className="font-bold text-sm">Jenny Patron</p>
-            <p className="text-xs text-gray-500">jenny@gmail.com</p>
-          </div>
-        </div>
-      </aside>
 
       {/* 메인 */}
       <main className="flex-1 p-12">
@@ -121,13 +100,13 @@ provider "aws" {
         <div className="flex space-x-4 mb-8">
           <button
             className="flex items-center px-4 py-2 rounded-t bg-white border-b-2 border-blue-600 font-bold"
-            onClick={() => router.push("/project")}
+            onClick={() => router.push("/dashboard/project")}
           >
             환경설정 <span className="ml-2 bg-purple-100 text-purple-700 rounded-full px-2 text-xs">25</span>
           </button>
           <button
             className="flex items-center px-4 py-2 rounded-t bg-white border-b-2 border-blue-600 font-bold"
-            onClick={() => router.push("/project/architecture")}
+            onClick={() => router.push("/dashboard/project/architecture")}
           >
             아키텍처 <span className="ml-2 bg-purple-100 text-purple-700 rounded-full px-2 text-xs">8</span>
           </button>
@@ -369,7 +348,7 @@ provider "aws" {
         <div className="flex justify-between mt-8">
           <button
             className="px-8 py-3 rounded bg-white border font-bold"
-            onClick={() => router.push("/project/architecture")}
+            onClick={() => router.push("/dashboard/project/architecture")}
           >
             이전
           </button>

@@ -15,27 +15,6 @@ export default function ProjectSettingPage() {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* 사이드바 */}
-      <aside className="w-60 bg-white border-r p-6 flex flex-col justify-between">
-        <div>
-          <h2 className="text-xl font-bold mb-8">Cloud-Cloudy</h2>
-          <nav>
-            <ul className="space-y-4">
-              <li><a href="#" className="font-semibold">Home</a></li>
-              <li><a href="#">My Projects</a></li>
-              <li><a href="#">Create projects</a></li>
-              <li><a href="#">Security</a></li>
-            </ul>
-          </nav>
-        </div>
-        <div className="flex items-center space-x-2 mt-8">
-          <img src="/avatar.png" alt="avatar" className="w-8 h-8 rounded-full" />
-          <div>
-            <p className="font-bold text-sm">Jenny Patron</p>
-            <p className="text-xs text-gray-500">jenny@gmail.com</p>
-          </div>
-        </div>
-      </aside>
 
       {/* 메인 */}
       <main className="flex-1 p-12">
@@ -149,7 +128,7 @@ export default function ProjectSettingPage() {
           <button
             className="mt-12 w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700"
             // 아키텍처 페이지로 이동
-            onClick={() => window.location.href = "/project/architecture"}
+            onClick={() => window.location.href = "/dashboard/project/architecture"}
           >
             다음 단계
           </button>
