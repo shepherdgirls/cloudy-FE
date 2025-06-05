@@ -1,6 +1,5 @@
 "use client";
 
-import "./mypage.css";
 import { useState, useEffect } from "react";
 
 export default function MyPage() {
@@ -14,7 +13,7 @@ export default function MyPage() {
     return (
         <div className="mypage">
             <h1>마이페이지</h1>
-            {/* <div className="user-info">
+            <div className="user-info">
                 <h2 className="font-bold">GitHub 기본 정보</h2>
                 <div className="user-box">
                     <div className="user-header">
@@ -35,7 +34,7 @@ export default function MyPage() {
 
             <div className="account">
                 <h2 className="font-bold">계정 연결</h2>
-                {/* <div className="account-header">
+                <div className="account-header">
                     <div className="tabs">
                         <button onClick={() => setActiveTab("aws")} className={activeTab === "aws" ? "active" : ""}>AWS</button>
                         <button onClick={() => setActiveTab("github")} className={activeTab === "github" ? "active" : ""}>GitHub</button>
@@ -76,7 +75,7 @@ export default function MyPage() {
                         </div>
                     </div>
                 )}
-            </div>*/}
+            </div>
         </div>
     );
 }

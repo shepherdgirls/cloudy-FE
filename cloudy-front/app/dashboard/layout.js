@@ -12,9 +12,7 @@ export default function DashboardLayout(props) {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-
         const token = localStorage.getItem('access');
-
         if (!token) {
             console.warn("❗ 토큰 없음");
             setLoading(false);
@@ -23,8 +21,8 @@ export default function DashboardLayout(props) {
 
         const fetchUserInfo = async () => {
             try {
-                console.log(token)
-                const response = await fetch("https://7336-222-110-177-102.ngrok-free.app/cloudy/cherry", {
+                console.log("요청하는 토큰:", token);
+                const response = await fetch("http://15.164.170.14:8000/cloudy/cherry", {
                     method: "GET",
                     credentials: 'include',
                     headers: {
@@ -33,17 +31,21 @@ export default function DashboardLayout(props) {
                     },
                 });
 
+                if (!response.ok) {
+                    const errorMessage = await response.text();  // 오류 메시지를 텍스트로 받기
+                    console.error("API 요청 실패:", errorMessage);
+                    throw new Error("Failed to fetch user info");
+                }
+
                 const contentType = response.headers.get("content-type");
                 console.log("🔍 Content-Type:", contentType);
 
-                const data = await response.json();
-                console.log("📄 응답 내용 (json):", data);
-
-                if (!response.ok || !contentType?.includes("application/json")) {
-                    throw new Error("❌ 응답이 JSON이 아님 (혹은 실패함)");
+                if (!contentType?.includes("application/json")) {
+                    throw new Error("❌ 응답이 JSON이 아님");
                 }
 
-                if (!response.ok) throw new Error("Failed to fetch user info");
+                const data = await response.json();
+                console.log("📄 응답 내용 (json):", data);
 
                 setUserInfo(data);
             } catch (error) {
@@ -55,6 +57,7 @@ export default function DashboardLayout(props) {
 
         fetchUserInfo();
     }, []);
+
 
     return (
         <div className="layout">
@@ -79,15 +82,21 @@ export default function DashboardLayout(props) {
                         <ul>
                             <li><a href="/dashboard/setting">Setting</a></li>
                         </ul>
-                        <div className="profile" onClick={() => setIsProfileOpen((prev) => !prev)}>
-                            <Link href="/dashboard/mypage">
-                                <img></img>
-                                <div>
-                                    <p>{userInfo.username}</p>
-                                    <p>{userInfo.email}</p>
+                        {userInfo && (
+                            <div className="profile" onClick={() => setIsProfileOpen((prev) => !prev)}>
+                                <div className="flex items-center space-x-2">
+                                <img
+                                    src={userInfo.github_avatar_url}
+                                    alt="GitHub Avatar"
+                                    className="w-8 h-8 rounded-full" // 작고 둥근 이미지
+                                />
+                                <div className="text-left">
+                                    <p className="text-sm font-medium">{userInfo.username}</p>
+                                    <p className="text-xs text-gray-500">{userInfo.email}</p>
                                 </div>
-                            </Link>
-                        </div>
+                                </div>
+                            </div>
+                        )}
 
                         {/* 슬라이드 팝업 */}
                         {isProfileOpen && (
