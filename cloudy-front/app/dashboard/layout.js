@@ -1,45 +1,112 @@
+"use client";
+
 import "./dashboard.css";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 
 export default function DashboardLayout(props) {
-    return (
-      <div className="layout">
-        {/* 헤더 */}
-        <header className="header">
-            <h1>Cloud-Cloudy</h1>
-        </header>
+  // 프로필 팝업
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [userInfo, setUserInfo] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-        {/* 사이드바 */}
-        <div className="container">
-            <nav className="sidebar">
-                <div className="sidebar-top">
-                    <ul className="menu">
-                        <li><Link href="/dashboard">Home</Link></li>
-                        <li><Link href="/dashboard/myProject">My Project</Link></li>
-                        <li><Link href="/dashboard/createProject">Create Project</Link></li>
-                        <li><Link href="/dashboard/security">Security</Link></li>
-                    </ul>
-                </div>
-                <div className="sidebar-bottom">
-                    <ul>
-                        <li><a href="/dashboard/setting">Setting</a></li>
-                    </ul>
-                    <div className="profile">
-                        <Link href="/dashboard/mypage">
-                            <img></img>
-                            <div>
-                                <p>Junny Patron</p>
-                                <p>junny@example.com</p>
-                            </div>
-                        </Link>
+  useEffect(() => {
+    const token = localStorage.getItem("access");
+    if (!token) {
+      console.warn("❗ 토큰 없음");
+      setLoading(false);
+      return;
+    }
+
+    useEffect(() => {
+        const token = localStorage.getItem('access');
+        if (!token) {
+            console.warn("❗ 토큰 없음");
+            setLoading(false);
+            return;
+        }
+
+        const fetchUserInfo = async () => {
+            try {
+                console.log("요청하는 토큰:", token);
+                const response = await fetch("http://15.164.170.14:8000/cloudy/cherry", {
+                    method: "GET",
+                    credentials: 'include',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                        Accept: 'application/json',
+                    },
+                });
+
+                if (!response.ok) {
+                    const errorMessage = await response.text();  // 오류 메시지를 텍스트로 받기
+                    console.error("API 요청 실패:", errorMessage);
+                    throw new Error("Failed to fetch user info");
+                }
+
+                const contentType = response.headers.get("content-type");
+                console.log("🔍 Content-Type:", contentType);
+
+                if (!contentType?.includes("application/json")) {
+                    throw new Error("❌ 응답이 JSON이 아님");
+                }
+
+                const data = await response.json();
+                console.log("📄 응답 내용 (json):", data);
+
+                setUserInfo(data);
+            } catch (error) {
+                console.error("GitHub 정보 가져오기 실패:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchUserInfo();
+    }, []);
+
+
+    return (
+        <div className="layout">
+            {/* 헤더 */}
+            <header className="header">
+                <Link href="/home">
+                    <span>Cloud-Cloudy</span>
+                </Link>
+            </header>
+
+            {/* 사이드바 */}
+            <div className="container">
+                <nav className="sidebar">
+                    <div className="sidebar-top">
+                        <ul className="menu">
+                            <li><Link href="/dashboard/myproject">My Project</Link></li>
+                            <li><Link href="/dashboard/createproject">Create Project</Link></li>
+                            <li><Link href="/dashboard/security">Security</Link></li>
+                        </ul>
                     </div>
-                </div>
-            </nav>
-        </div>
-  
-        {/* 메인 콘텐츠 */}
-        <main className="content">{props.children}</main>
-      </div>
-    );
-  }
-  
+                    <div className="sidebar-bottom">
+                        <ul>
+                            <li><a href="/dashboard/setting">Setting</a></li>
+                        </ul>
+                        {userInfo && (
+                            <div className="profile" onClick={() => setIsProfileOpen((prev) => !prev)}>
+                                <div className="flex items-center space-x-2">
+                                <img
+                                    src={userInfo.github_avatar_url}
+                                    alt="GitHub Avatar"
+                                    className="w-8 h-8 rounded-full" // 작고 둥근 이미지
+                                />
+                                <div className="text-left">
+                                    <p className="text-sm font-medium">{userInfo.username}</p>
+                                    <p className="text-xs text-gray-500">{userInfo.email}</p>
+                                </div>
+                                </div>
+                            </div>
+                        )}
+
+      {/* 메인 콘텐츠 */}
+      <main className="content">{props.children}</main>
+    </div>
+  );
+}
