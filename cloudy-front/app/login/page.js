@@ -15,7 +15,7 @@ export default function LoginPage() {
             if (!code) return;
 
             try {
-                const response = await fetch('https://42e0-58-79-8-251.ngrok-free.app/cloudy-auth/github/', {
+                const response = await fetch('http://15.164.170.14:8000/cloudy-auth/github/', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
