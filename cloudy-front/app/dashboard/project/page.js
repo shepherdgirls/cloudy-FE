@@ -88,19 +88,56 @@ export default function ProjectSettingPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // 프로젝트 생성 API 호출
-  const handleNext = () => {
+  // 레포 생성 API 호출
+  const createRepo = async () => {
+    const token = localStorage.getItem("access");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return false;
+    }
+    try {
+      const res = await fetch("http://15.164.170.14:8000/github/create-repo/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: gitRepo,
+          description: projectDesc,
+          auto_init: true,
+        }),
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        alert("레포 생성 실패: " + msg);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      alert("네트워크 오류: " + e.message);
+      return false;
+    }
+  };
+
+  // 다음 단계로 이동
+  const handleNext = async () => {
     if (!projectName || !gitRepo) {
       alert("프로젝트 이름과 Git 레포 이름을 입력하세요.");
       return;
     }
-    router.push(
-      `/dashboard/project/architecture?projectName=${encodeURIComponent(
-        projectName
-      )}&projectDesc=${encodeURIComponent(
-        projectDesc
-      )}&gitRepo=${encodeURIComponent(gitRepo)}`
-    );
+    setLoading(true);
+    const repoCreated = await createRepo();
+    setLoading(false);
+    if (repoCreated) {
+      router.push(
+        `/dashboard/project/architecture?projectName=${encodeURIComponent(
+          projectName
+        )}&projectDesc=${encodeURIComponent(
+          projectDesc
+        )}&gitRepo=${encodeURIComponent(gitRepo)}`
+      );
+    }
   };
 
   return (
@@ -139,7 +176,7 @@ export default function ProjectSettingPage() {
             />
 
             <Button type="submit" disabled={loading}>
-              {loading ? "생성 중..." : "다음 단계"}
+              {loading ? "레포 생성 중..." : "다음 단계"}
             </Button>
           </form>
         </Card>
