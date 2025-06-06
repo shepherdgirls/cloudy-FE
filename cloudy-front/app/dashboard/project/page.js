@@ -1,139 +1,149 @@
 "use client";
 
 import { useState } from "react";
+import styled from "styled-components";
+import { useRouter } from "next/navigation";
+
+const Container = styled.div`
+  min-height: 100vh;
+  background: #f9fafb;
+  display: flex;
+`;
+
+const Main = styled.main`
+  flex: 1;
+  padding: 48px;
+`;
+
+const Title = styled.h1`
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+`;
+
+const SubTitle = styled.p`
+  font-size: 0.95rem;
+  color: #6b7280;
+  margin-bottom: 2rem;
+`;
+
+const Card = styled.div`
+  background: #fff;
+  border-radius: 1rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 3rem;
+  max-width: 600px;
+  margin: 0 auto;
+`;
+
+const SectionTitle = styled.h2`
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 0.5rem;
+`;
+
+const SectionDesc = styled.p`
+  color: #6b7280;
+  margin-bottom: 2rem;
+`;
+
+const Label = styled.label`
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+`;
+
+const Input = styled.input`
+  width: 100%;
+  border: 1px solid #d1d5db;
+  border-radius: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+  &:focus {
+    outline: 2px solid #2563eb;
+    border-color: #2563eb;
+  }
+`;
+
+const Button = styled.button`
+  width: 100%;
+  background: #2563eb;
+  color: #fff;
+  padding: 0.9rem 0;
+  border-radius: 0.5rem;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-top: 2.5rem;
+  transition: background 0.2s;
+  &:hover {
+    background: #1d4ed8;
+  }
+`;
 
 export default function ProjectSettingPage() {
-  // UI 상태 (실제 API 연동 X)
   const [projectName, setProjectName] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
   const [gitRepo, setGitRepo] = useState("");
-  const [gitBranch, setGitBranch] = useState("");
-  const [gitDir, setGitDir] = useState("");
-  const [awsProfile, setAwsProfile] = useState("");
-  const [region, setRegion] = useState("ap-northeast-2");
-  const [tags, setTags] = useState([{ key: "Environment", value: "Development" }]);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+
+  // 프로젝트 생성 API 호출
+  const handleNext = () => {
+    if (!projectName || !gitRepo) {
+      alert("프로젝트 이름과 Git 레포 이름을 입력하세요.");
+      return;
+    }
+    router.push(
+      `/dashboard/project/architecture?projectName=${encodeURIComponent(
+        projectName
+      )}&projectDesc=${encodeURIComponent(
+        projectDesc
+      )}&gitRepo=${encodeURIComponent(gitRepo)}`
+    );
+  };
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <Container>
+      <Main>
+        <Title>프로젝트</Title>
+        <SubTitle>Projects &gt; Pipeline</SubTitle>
+        <Card>
+          <SectionTitle>환경설정</SectionTitle>
+          <SectionDesc>프로젝트의 기본 정보와 git 저장소를 입력하세요.</SectionDesc>
+          <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
+            <Label htmlFor="projectName">프로젝트 이름</Label>
+            <Input
+              id="projectName"
+              placeholder="예: my-aws-project"
+              value={projectName}
+              onChange={(e) => setProjectName(e.target.value)}
+              required
+            />
 
-      {/* 메인 */}
-      <main className="flex-1 p-12">
-        <h1 className="text-3xl font-bold mb-2">프로젝트</h1>
-        <p className="text-sm text-gray-500 mb-8">Projects &gt; Pipeline</p>
+            <Label htmlFor="projectDesc">프로젝트 설명</Label>
+            <Input
+              id="projectDesc"
+              placeholder="예: 웹 애플리케이션을 위한 AWS 인프라"
+              value={projectDesc}
+              onChange={(e) => setProjectDesc(e.target.value)}
+            />
 
-        {/* 상단 탭 */}
-        <div className="flex space-x-4 mb-8">
-          <button className="flex items-center px-4 py-2 rounded-t bg-white border-b-2 border-blue-600 font-bold">
-            환경설정 <span className="ml-2 bg-purple-100 text-purple-700 rounded-full px-2 text-xs">25</span>
-          </button>
-          <button className="flex items-center px-4 py-2 rounded-t bg-gray-100 text-gray-400 cursor-not-allowed">
-            아키텍처 <span className="ml-2 bg-purple-100 text-purple-700 rounded-full px-2 text-xs">8</span>
-          </button>
-          <button className="flex items-center px-4 py-2 rounded-t bg-gray-100 text-gray-400 cursor-not-allowed">
-            테라폼 커스텀 <span className="ml-2 bg-purple-100 text-purple-700 rounded-full px-2 text-xs">12</span>
-          </button>
-        </div>
+            <Label htmlFor="gitRepo">새로 만들 Git 레포 이름</Label>
+            <Input
+              id="gitRepo"
+              placeholder="예: my-aws-repo"
+              value={gitRepo}
+              onChange={(e) => setGitRepo(e.target.value)}
+              required
+            />
 
-        {/* 환경설정 폼 */}
-        <div className="bg-white rounded-lg shadow p-12 max-w-5xl mx-auto">
-          <h2 className="text-2xl font-bold mb-2">환경설정</h2>
-          <p className="text-gray-500 mb-8">프로젝트의 기본 정보와 환경을 설정합니다.</p>
-          <div className="grid grid-cols-2 gap-8">
-            {/* 왼쪽 */}
-            <div>
-              <label className="block font-semibold mb-2">프로젝트 이름</label>
-              <input
-                className="w-full border rounded px-3 py-2 mb-6"
-                placeholder="예: my-aws-project"
-                value={projectName}
-                onChange={e => setProjectName(e.target.value)}
-              />
-
-              <label className="block font-semibold mb-2">Git 저장소 연결</label>
-              <select
-                className="w-full border rounded px-3 py-2 mb-4"
-                value={gitRepo}
-                onChange={e => setGitRepo(e.target.value)}
-              >
-                <option value="">Git 저장소 선택</option>
-                <option value="repo1">github.com/your/repo1</option>
-                <option value="repo2">github.com/your/repo2</option>
-              </select>
-              <div className="flex space-x-2 mb-6">
-                <select
-                  className="w-1/2 border rounded px-3 py-2"
-                  value={gitBranch}
-                  onChange={e => setGitBranch(e.target.value)}
-                >
-                  <option value="">브랜치 선택</option>
-                  <option value="main">main</option>
-                  <option value="dev">dev</option>
-                </select>
-                <input
-                  className="w-1/2 border rounded px-3 py-2"
-                  placeholder="디렉토리 (선택)"
-                  value={gitDir}
-                  onChange={e => setGitDir(e.target.value)}
-                />
-              </div>
-
-              <label className="block font-semibold mb-2">AWS 리전 선택</label>
-              <select
-                className="w-full border rounded px-3 py-2"
-                value={region}
-                onChange={e => setRegion(e.target.value)}
-              >
-                <option value="ap-northeast-2">ap-northeast-2 (서울)</option>
-                <option value="us-east-1">us-east-1 (버지니아)</option>
-              </select>
-            </div>
-            {/* 오른쪽 */}
-            <div>
-              <label className="block font-semibold mb-2">프로젝트 설명</label>
-              <input
-                className="w-full border rounded px-3 py-2 mb-6"
-                placeholder="예: 웹 애플리케이션을 위한 AWS 인프라"
-                value={projectDesc}
-                onChange={e => setProjectDesc(e.target.value)}
-              />
-
-              <label className="block font-semibold mb-2">AWS 계정 설정</label>
-              <select
-                className="w-full border rounded px-3 py-2 mb-6"
-                value={awsProfile}
-                onChange={e => setAwsProfile(e.target.value)}
-              >
-                <option value="">AWS 프로필 선택</option>
-                <option value="profile1">profile1</option>
-                <option value="profile2">profile2</option>
-              </select>
-
-              <label className="block font-semibold mb-2">리소스 태그 설정 (선택)</label>
-              <div className="flex space-x-2 mb-2">
-                <input
-                  className="border rounded px-3 py-2 w-1/2"
-                  value={tags[0].key}
-                  onChange={e => setTags([{ ...tags[0], key: e.target.value }])}
-                  placeholder="키"
-                />
-                <input
-                  className="border rounded px-3 py-2 w-1/2"
-                  value={tags[0].value}
-                  onChange={e => setTags([{ ...tags[0], value: e.target.value }])}
-                  placeholder="값"
-                />
-              </div>
-            </div>
-          </div>
-          <button
-            className="mt-12 w-full bg-blue-600 text-white py-3 rounded font-bold hover:bg-blue-700"
-            // 아키텍처 페이지로 이동
-            onClick={() => window.location.href = "/dashboard/project/architecture"}
-          >
-            다음 단계
-          </button>
-        </div>
-      </main>
-    </div>
+            <Button type="submit" disabled={loading}>
+              {loading ? "생성 중..." : "다음 단계"}
+            </Button>
+          </form>
+        </Card>
+      </Main>
+    </Container>
   );
 }
