@@ -169,8 +169,11 @@ export default function ArchitectureSelectPage() {
 
   // 이전 페이지에서 받은 값
   const [projectName, setProjectName] = useState("");
+  console.log("Project Name:", projectName);
   const [projectDesc, setProjectDesc] = useState("");
+  console.log("Project Description:", projectDesc);
   const [gitRepo, setGitRepo] = useState("");
+  console.log("Git Repository:", gitRepo);
   const [selected, setSelected] = useState(architectures[0].key);
 
   // 쿼리스트링에서 값 받아오기

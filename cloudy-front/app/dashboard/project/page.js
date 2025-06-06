@@ -170,6 +170,8 @@ export default function ProjectSettingPage() {
       setLoading(false);
       return;
     }
+    // 레포 생성 후 1초 대기, 바로 생성하면 오류
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     const secretsRegistered = await registerSecrets();
     setLoading(false);
     if (secretsRegistered) {
