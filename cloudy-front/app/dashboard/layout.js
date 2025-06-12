@@ -5,18 +5,11 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 
 export default function DashboardLayout(props) {
-  // 프로필 팝업
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [userInfo, setUserInfo] = useState(null);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem("access");
-    if (!token) {
-      console.warn("❗ 토큰 없음");
-      setLoading(false);
-      return;
-    }
+    // 프로필 팝업
+    const [isProfileOpen, setIsProfileOpen] = useState(false);
+    const [userInfo, setUserInfo] = useState(null);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         const token = localStorage.getItem('access');
@@ -81,7 +74,7 @@ export default function DashboardLayout(props) {
                     <div className="sidebar-top">
                         <ul className="menu">
                             <li><Link href="/dashboard/myproject">My Project</Link></li>
-                            <li><Link href="/dashboard/createproject">Create Project</Link></li>
+                            <li><Link href="/dashboard/project">Create Project</Link></li>
                             <li><Link href="/dashboard/security">Security</Link></li>
                         </ul>
                     </div>
@@ -92,21 +85,47 @@ export default function DashboardLayout(props) {
                         {userInfo && (
                             <div className="profile" onClick={() => setIsProfileOpen((prev) => !prev)}>
                                 <div className="flex items-center space-x-2">
-                                <img
-                                    src={userInfo.github_avatar_url}
-                                    alt="GitHub Avatar"
-                                    className="w-8 h-8 rounded-full" // 작고 둥근 이미지
-                                />
-                                <div className="text-left">
-                                    <p className="text-sm font-medium">{userInfo.username}</p>
-                                    <p className="text-xs text-gray-500">{userInfo.email}</p>
-                                </div>
+                                    <img
+                                        src={userInfo.github_avatar_url}
+                                        alt="GitHub Avatar"
+                                        className="w-8 h-8 rounded-full" // 작고 둥근 이미지
+                                    />
+                                    <div className="text-left">
+                                        <p className="text-sm font-medium">{userInfo.username}</p>
+                                        <p className="text-xs text-gray-500">{userInfo.email}</p>
+                                    </div>
                                 </div>
                             </div>
                         )}
 
-      {/* 메인 콘텐츠 */}
-      <main className="content">{props.children}</main>
-    </div>
-  );
+                        {/* 슬라이드 팝업 */}
+                        {isProfileOpen && (
+                            <div className="profile-popup">
+                                <button className="close-btn" onClick={() => setIsProfileOpen(false)}>×</button>
+                                <div className="user">
+                                    <h2 className="font-bold text-xl">GitHub 정보</h2>
+                                    <div className="user-info">
+                                        <img src={userInfo.github_avatar_url} alt="GitHub Avatar" style={{ width: "100px", borderRadius: "8px" }} />
+                                        <div>
+                                            <p className="font-bold text-l">{userInfo.username}</p>
+                                            <p>{userInfo.email}</p>
+                                            <div className="logout-button">
+                                                <button onClick={() => {
+                                                    localStorage.removeItem("token");
+                                                    window.location.href = "/";
+                                                }}>Logout</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                </nav>
+            </div>
+
+            {/* 메인 콘텐츠 */}
+            <main className="content">{props.children}</main>
+        </div>
+    );
 }

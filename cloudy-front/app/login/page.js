@@ -12,6 +12,8 @@ export default function LoginPage() {
             const urlParams = new URLSearchParams(window.location.search);
             const code = urlParams.get('code');
 
+            console.log('🔍 받은 코드:', code); // 코드 확인
+
             if (!code) return;
 
             try {

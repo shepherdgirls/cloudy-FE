@@ -1,17 +1,121 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function SecurityCheck() {
     const [code, setCode] = useState("");
     const [results, setResults] = useState([]);
-    const [activeTab, setActiveTab] = useState("upload");
+    const [activeTab, setActiveTab] = useState("project");
+    const [projects, setProjects] = useState([]);
 
-    const handleSubmit = async () => {
-        const response = await fetch("http://localhost:8000/api/check_security/", {
+    // ✅ 더미 프로젝트 리스트
+    const dummyProjects = [
+        { name: "EC2+RDS 프로젝트", description: "기본 EC2 + RDS 구성 예제", createdAt: "2025.06.01" },
+        { name: "S3 버킷 공개 설정", description: "S3 보안 테스트용 구성", createdAt: "2025.06.02" },
+        { name: "Security Group 실험", description: "보안 그룹 허용 테스트", createdAt: "2025.06.03" },
+    ];
+
+    // ✅ 프로젝트 이름 ↔ 코드 매핑
+    const projectCodeMap = {
+        "EC2+RDS 프로젝트": `
+resource "aws_instance" "web" {
+  ami           = "ami-123456"
+  instance_type = "t2.micro"
+}
+
+resource "aws_db_instance" "default" {
+  allocated_storage    = 20
+  engine               = "mysql"
+  instance_class       = "db.t2.micro"
+  name                 = "mydb"
+  username             = "foo"
+  password             = "bar"
+  parameter_group_name = "default.mysql5.7"
+}
+        `,
+        "S3 버킷 공개 설정": `
+resource "aws_s3_bucket" "b" {
+  bucket = "my-bucket"
+  acl    = "public-read"
+}
+        `,
+        "Security Group 실험": `
+resource "aws_security_group" "sg" {
+  name        = "allow_all"
+  description = "Allow all inbound traffic"
+  ingress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+        `,
+    };
+
+    useEffect(() => {
+        if (activeTab === "project") {
+            // ✅ 더미 데이터 세팅
+            setProjects(dummyProjects);
+        }
+    }, [activeTab]);
+
+    // useEffect(() => {
+    //     if (activeTab === "project") {
+    //         fetch("http://localhost:8000/api/my_projects/")
+    //             .then(res => res.json())
+    //             .then(data => {
+    //                 const content = data.file?.content || "";
+    //                 setCode(content);       // 바로 코드 세팅
+    //                 handleSubmit(content);  // 점검 실행
+    //             })
+    //             .catch(err => console.error("프로젝트 불러오기 실패:", err));
+    //     }
+    // }, [activeTab]);
+
+    const handleProjectSelect = async (/*repo*/) => {
+        try {
+            const accessToken = localStorage.getItem("access"); // 🔐 저장된 JWT 가져오기
+
+            /*const response = await fetch(
+                `http://15.164.170.14:8000/github/repo-files/?repo_name=${repo}&branch=main&path=main.tf`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );*/
+
+            const response = await fetch(
+                `http://15.164.170.14:8000/github/repo-files/?repo_name=cloud_TF&branch=main&path=main.tf`,
+                {
+                    headers: {
+                        Authorization: `Bearer ${accessToken}`,
+                    },
+                }
+            );
+
+            const data = await response.json();
+            const content = data.file?.content || ""; // content만 추출
+
+            setCode(content); // 코드 상태 저장
+            handleSubmit(content); // 여기 인자로 넘기면 분석 즉시 실행
+        } catch (err) {
+            console.error("main.tf 코드 불러오기 실패:", err);
+        }
+    };
+
+
+    const handleSubmit = async (customCode = null) => {
+        const codeToAnalyze =
+            typeof customCode === "string" && customCode.trim() !== ""
+                ? customCode
+                : code;
+
+        const response = await fetch("http://15.164.170.14:8000/check_security/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ terraform_code: code }),
+            body: JSON.stringify({ terraform_code: codeToAnalyze }),
         });
 
         const data = await response.json();
@@ -22,6 +126,8 @@ export default function SecurityCheck() {
             console.error("결과 파싱 오류:", err);
         }
     };
+
+
 
     const severityColor = (severity) => {
         switch (severity) {
@@ -40,7 +146,7 @@ export default function SecurityCheck() {
         <div className="p-8">
             <h1 className="text-2xl font-bold mb-1">Terraform 보안 분석</h1>
             <div className="text-sm text-gray-500 mb-4">
-                <span className="text-purple-600 cursor-pointer">Security</span> &gt; {activeTab === "upload" ? "Upload" : "Write Code"}
+                <span className="text-purple-600 cursor-pointer">Security</span> &gt; {activeTab === "project" ? "My Project" : "Write Code"}
             </div>
 
             <div className="flex gap-6">
@@ -50,10 +156,10 @@ export default function SecurityCheck() {
                         <h2 className="text-xl font-semibold">Terraform Code</h2>
                         <div className="flex space-x-2">
                             <button
-                                onClick={() => setActiveTab("upload")}
-                                className={`px-3 py-1 rounded ${activeTab === "upload" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
+                                onClick={() => setActiveTab("project")}
+                                className={`px-3 py-1 rounded ${activeTab === "project" ? "bg-blue-600 text-white" : "bg-gray-200"}`}
                             >
-                                Upload
+                                My Project
                             </button>
                             <button
                                 onClick={() => setActiveTab("write")}
@@ -82,29 +188,53 @@ export default function SecurityCheck() {
                         </>
                     )}
 
-                    {activeTab === "upload" && (
-                        <>
-                            <input
-                                type="file"
-                                accept=".tf"
-                                className="mb-4"
-                                onChange={(e) => {
-                                    const file = e.target.files[0];
-                                    if (file) {
-                                        const reader = new FileReader();
-                                        reader.onload = (event) => setCode(event.target.result);
-                                        reader.readAsText(file);
-                                    }
-                                }}
-                            />
+                    {/* My Projects */}
+                    {/*{activeTab === "project" && (
+                        <div className="space-y-2">
+                            {projects.length === 0 ? (
+                                <p className="text-gray-500">프로젝트를 불러오는 중이거나 없습니다.</p>
+                            ) : (
+                                projects.map((project, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="p-3 border rounded hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => handleProjectSelect(project.name)}
+                                    >
+                                        <div className="font-semibold">{project.name}</div>
+                                        <div className="text-sm text-gray-500">{project.description}</div>
+                                        <div className="text-xs text-gray-400">{project.createdAt}</div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
+                    )}*/}
+                    {activeTab === "project" && (
+                        <div className="space-y-2">
                             <button
-                                className="px-4 py-2 bg-blue-600 text-white rounded self-start"
-                                onClick={handleSubmit}
+                                className="mb-3 px-4 py-2 bg-green-600 text-white rounded"
+                                onClick={handleProjectSelect}
                             >
-                                분석
+                                내 GitHub의 main.tf 분석
                             </button>
-                        </>
+
+                            {projects.length === 0 ? (
+                                <p className="text-gray-500">프로젝트를 불러오는 중이거나 없습니다.</p>
+                            ) : (
+                                projects.map((project, idx) => (
+                                    <div
+                                        key={idx}
+                                        className="p-3 border rounded hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => setCode(projectCodeMap[project.name])}
+                                    >
+                                        <div className="font-semibold">{project.name}</div>
+                                        <div className="text-sm text-gray-500">{project.description}</div>
+                                        <div className="text-xs text-gray-400">{project.createdAt}</div>
+                                    </div>
+                                ))
+                            )}
+                        </div>
                     )}
+
                 </div>
 
                 {/* 우측: 결과 */}

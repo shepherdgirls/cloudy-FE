@@ -21,8 +21,17 @@ export default function SecurityCheck() {
 
         data.results?.forEach((item) => {
             const fix = item.fix?.suggested_fix?.edit;
+            console.log("📍 수정 제안:", fix); // 디버깅
+
             if (fix?.content && typeof fix.line === "number") {
-                lines[fix.line - 1] = fix.content; // 해당 라인에 수정 적용
+                const fixedLines = fix.content.split("\n");
+
+                // 디버깅 로그
+                console.log("💬 원래 라인:", lines[fix.line - 1]);
+                console.log("🛠️ 수정 라인:", fixedLines);
+
+                // 해당 줄부터 기존 줄 수만큼 제거하고 새 줄로 대체
+                lines.splice(fix.line - 1, fixedLines.length, ...fixedLines);
             }
         });
 
