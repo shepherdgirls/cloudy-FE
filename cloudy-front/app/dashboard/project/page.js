@@ -85,22 +85,104 @@ export default function ProjectSettingPage() {
   const [projectName, setProjectName] = useState("");
   const [projectDesc, setProjectDesc] = useState("");
   const [gitRepo, setGitRepo] = useState("");
+  const [awsAccessKey, setAwsAccessKey] = useState("");
+  const [awsSecretKey, setAwsSecretKey] = useState("");
+  const [dbPassword, setDbPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  // 프로젝트 생성 API 호출
-  const handleNext = () => {
-    if (!projectName || !gitRepo) {
-      alert("프로젝트 이름과 Git 레포 이름을 입력하세요.");
+  // 레포 생성 API 호출
+  const createRepo = async () => {
+    const token = localStorage.getItem("access");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return false;
+    }
+    try {
+      const res = await fetch("http://15.164.170.14:8000/github/create-repo/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          name: gitRepo,
+          description: projectDesc,
+          auto_init: true,
+        }),
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        alert("레포 생성 실패: " + msg);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      alert("네트워크 오류: " + e.message);
+      return false;
+    }
+  };
+
+  // Github Secret 등록 API 호출
+  const registerSecrets = async () => {
+    const token = localStorage.getItem("access");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return false;
+    }
+    try {
+      const res = await fetch("http://15.164.170.14:8000/github/secrets/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          repo_name: gitRepo,
+          secrets: {
+            AWS_ACCESS_KEY_ID: awsAccessKey,
+            AWS_SECRET_ACCESS_KEY: awsSecretKey,
+            DB_PASSWORD: dbPassword,
+          },
+        }),
+      });
+      if (!res.ok) {
+        const msg = await res.text();
+        alert("GitHub Secret 등록 실패: " + msg);
+        return false;
+      }
+      return true;
+    } catch (e) {
+      alert("네트워크 오류: " + e.message);
+      return false;
+    }
+  };
+
+  // 다음 단계로 이동
+  const handleNext = async () => {
+    if (!projectName || !gitRepo || !awsAccessKey || !awsSecretKey || !dbPassword) {
+      alert("모든 필드를 입력하세요.");
       return;
     }
-    router.push(
-      `/dashboard/project/architecture?projectName=${encodeURIComponent(
-        projectName
-      )}&projectDesc=${encodeURIComponent(
-        projectDesc
-      )}&gitRepo=${encodeURIComponent(gitRepo)}`
-    );
+    setLoading(true);
+    const repoCreated = await createRepo();
+    if (!repoCreated) {
+      setLoading(false);
+      return;
+    }
+    // 레포 생성 후 1초 대기, 바로 생성하면 오류
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const secretsRegistered = await registerSecrets();
+    setLoading(false);
+    if (secretsRegistered) {
+      router.push(
+        `/dashboard/project/architecture?projectName=${encodeURIComponent(
+          projectName
+        )}&projectDesc=${encodeURIComponent(
+          projectDesc
+        )}&gitRepo=${encodeURIComponent(gitRepo)}`
+      );
+    }
   };
 
   return (
@@ -110,7 +192,7 @@ export default function ProjectSettingPage() {
         <SubTitle>Projects &gt; Pipeline</SubTitle>
         <Card>
           <SectionTitle>환경설정</SectionTitle>
-          <SectionDesc>프로젝트의 기본 정보와 git 저장소를 입력하세요.</SectionDesc>
+          <SectionDesc>프로젝트의 기본 정보와 git 저장소, AWS/DB Secrets를 입력하세요.</SectionDesc>
           <form onSubmit={(e) => { e.preventDefault(); handleNext(); }}>
             <Label htmlFor="projectName">프로젝트 이름</Label>
             <Input
@@ -138,8 +220,36 @@ export default function ProjectSettingPage() {
               required
             />
 
+            <Label htmlFor="awsAccessKey">AWS ACCESS KEY ID</Label>
+            <Input
+              id="awsAccessKey"
+              placeholder="AWS_ACCESS_KEY_ID"
+              value={awsAccessKey}
+              onChange={(e) => setAwsAccessKey(e.target.value)}
+              required
+            />
+
+            <Label htmlFor="awsSecretKey">AWS SECRET ACCESS KEY</Label>
+            <Input
+              id="awsSecretKey"
+              placeholder="AWS_SECRET_ACCESS_KEY"
+              value={awsSecretKey}
+              onChange={(e) => setAwsSecretKey(e.target.value)}
+              required
+            />
+
+            <Label htmlFor="dbPassword">DB PASSWORD</Label>
+            <Input
+              id="dbPassword"
+              placeholder="DB_PASSWORD"
+              type="password"
+              value={dbPassword}
+              onChange={(e) => setDbPassword(e.target.value)}
+              required
+            />
+
             <Button type="submit" disabled={loading}>
-              {loading ? "생성 중..." : "다음 단계"}
+              {loading ? "레포/시크릿 생성 중..." : "다음 단계"}
             </Button>
           </form>
         </Card>

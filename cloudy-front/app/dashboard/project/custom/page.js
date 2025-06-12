@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import styled from "styled-components";
 
-// styled-components 사용
+// styled-components 정의
 const Container = styled.div`
   display: flex;
   min-height: 100vh;
@@ -28,22 +28,9 @@ const SubTitle = styled.p`
   margin-bottom: 2rem;
 `;
 
-const TabRow = styled.div`
+const Flex = styled.div`
   display: flex;
-  gap: 1rem;
-  margin-bottom: 2rem;
-`;
-
-const TabButton = styled.button`
-  display: flex;
-  align-items: center;
-  padding: 0.5rem 1rem;
-  border-radius: 0.5rem 0.5rem 0 0;
-  background: ${({ active }) => (active ? "#fff" : "#fff")};
-  border-bottom: 2px solid ${({ active }) => (active ? "#2563eb" : "#fff")};
-  font-weight: bold;
-  color: ${({ active }) => (active ? "#2563eb" : "#6b7280")};
-  cursor: ${({ disabled }) => (disabled ? "not-allowed" : "pointer")};
+  gap: 2rem;
 `;
 
 const FormCard = styled.div`
@@ -58,23 +45,19 @@ const Section = styled.div`
   margin-bottom: 1.5rem;
 `;
 
-const SectionTitle = styled.h3`
-  font-weight: bold;
-  margin-bottom: 0.5rem;
-`;
-
-const Flex = styled.div`
+const Label = styled.label`
   display: flex;
-  gap: ${({ gap }) => gap || "0"};
-  margin-bottom: ${({ mb }) => mb || "0"};
+  align-items: center;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
 `;
 
 const Input = styled.input`
   border: 1px solid #d1d5db;
   border-radius: 0.375rem;
   padding: 0.5rem 0.75rem;
-  width: ${({ w }) => w || "100%"};
-  margin-bottom: ${({ mb }) => mb || "0"};
+  width: 100%;
+  margin-bottom: 0.5rem;
 `;
 
 const Select = styled.select`
@@ -85,15 +68,10 @@ const Select = styled.select`
   margin-bottom: 0.5rem;
 `;
 
-const Label = styled.label`
-  display: flex;
-  align-items: center;
-  font-weight: ${({ bold }) => (bold ? "bold" : "normal")};
-  margin-bottom: ${({ mb }) => mb || "0"};
-`;
-
-const Checkbox = styled.input.attrs({ type: "checkbox" })`
-  margin-right: 0.5rem;
+const Info = styled.span`
+  font-size: 0.85rem;
+  color: #2563eb;
+  margin-left: 0.5rem;
 `;
 
 const CodePanel = styled.div`
@@ -110,8 +88,8 @@ const CodeTabButton = styled.button`
   padding: 0.5rem 1rem;
   font-size: 0.875rem;
   font-family: "Fira Mono", monospace;
-  background: ${({ active }) => (active ? "#1f2937" : "transparent")};
-  color: ${({ active }) => (active ? "#60a5fa" : "#9ca3af")};
+  background: ${({ $active }) => ($active ? "#1f2937" : "transparent")};
+  color: ${({ $active }) => ($active ? "#60a5fa" : "#9ca3af")};
   border-radius: 0.5rem 0.5rem 0 0;
   border: none;
   cursor: pointer;
@@ -130,6 +108,12 @@ const CodePre = styled.pre`
   font-size: 0.75rem;
   font-family: "Fira Mono", monospace;
   white-space: pre-wrap;
+  .highlight {
+    background: #2563eb;
+    color: #fff;
+    border-radius: 0.25rem;
+    padding: 0 0.2em;
+  }
 `;
 
 const BottomRow = styled.div`
@@ -142,353 +126,325 @@ const BottomButton = styled.button`
   padding: 0.75rem 2rem;
   border-radius: 0.5rem;
   font-weight: bold;
-  border: ${({ primary }) => (primary ? "none" : "1px solid #d1d5db")};
-  background: ${({ primary }) => (primary ? "#2563eb" : "#fff")};
-  color: ${({ primary }) => (primary ? "#fff" : "#111827")};
+  border: ${({ $primary }) => ($primary ? "none" : "1px solid #d1d5db")};
+  background: ${({ $primary }) => ($primary ? "#2563eb" : "#fff")};
+  color: ${({ $primary }) => ($primary ? "#fff" : "#111827")};
   &:hover {
-    background: ${({ primary }) => (primary ? "#1d4ed8" : "#f3f4f6")};
+    background: ${({ $primary }) => ($primary ? "#1d4ed8" : "#f3f4f6")};
   }
 `;
 
-const codeTabs = [
-  { key: "main.tf", label: "main.tf" },
-  { key: "vpc.tf", label: "vpc.tf" },
-  { key: "ec2.tf", label: "ec2.tf" },
-  { key: "alb.tf", label: "alb.tf" },
-  { key: "rds.tf", label: "rds.tf" },
-];
-
 const initialForm = {
-  vpcCidr: "10.0.0.0/16",
-  vpcSubnetCount: 3,
-  ec2Ami: "Ubuntu 20.04 LTS",
-  ec2Name: "",
-  ec2Count: 2,
-  ec2SshKey: "",
-  ec2Options: {
-    httpd: false,
-    docker: false,
-  },
-  albName: "",
-  albTarget: "",
-  albHealth: "",
-  albPath: "",
-  albHttps: false,
-  rdsEngine: "mysql",
-  rdsName: "",
-  rdsUser: "",
-  rdsPassword: "",
-  rdsStorage: 20,
-  rdsMultiAz: false,
-  rdsPublic: false,
-  securityOptions: {
-    allowHttp: true,
-    allowHttps: false,
-    allowSsh: false,
-  },
+  ec2InstanceType: "t2.micro",
+  keyPairName: "",
+  dbEngine: "postgres",
+  dbUsername: "admin",
+  dbPassword: "",
+  dbStorage: 20,
+  albHealthPath: "/",
 };
 
 export default function TerraformCustomPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [form, setForm] = useState(initialForm);
   const [activeTab, setActiveTab] = useState("main.tf");
+  const [highlightField, setHighlightField] = useState(null);
+  const [loading, setLoading] = useState(false);
 
-  // 코드 미리보기 예시 (실제론 API로 받아올 예정)
+  // 프로젝트 정보 쿼리스트링에서 받기
+  const projectName = searchParams.get("projectName") || "";
+  const projectDesc = searchParams.get("projectDesc") || "";
+  const gitRepo = searchParams.get("gitRepo") || "";
+
+  useEffect(() => {
+    const dbPassword =
+      searchParams.get("dbPassword") ||
+      localStorage.getItem("DB_PASSWORD") ||
+      "";
+    setForm((prev) => ({
+      ...prev,
+      dbPassword: dbPassword ?? "",
+      keyPairName: prev.keyPairName ?? "",
+      dbUsername: prev.dbUsername ?? "",
+      albHealthPath: prev.albHealthPath ?? "/",
+    }));
+  }, [searchParams]);
+
+  // variables.tf 생성 함수
+  const generateVariablesTf = () => {
+    return `variable "project_name" {
+  type        = string
+  description = "AWS 리소스 태그로 사용될 프로젝트 이름"
+  default     = "${projectName}"
+}
+
+variable "ec2_instance_type" {
+  type        = string
+  default     = "${form.ec2InstanceType}"
+  description = "EC2 인스턴스 타입"
+}
+
+variable "ec2_ami_id" {
+  type        = string
+  description = "EC2에서 사용할 AMI ID"
+  default     = "ami-0891aeb92f786d7a2"
+}
+
+variable "rds_engine" {
+  type        = string
+  default     = "${form.dbEngine}"
+  description = "RDS 데이터베이스 엔진"
+}
+
+variable "rds_instance_class" {
+  type        = string
+  default     = "db.t3.micro"
+  description = "RDS 인스턴스 타입"
+}
+
+variable "rds_username" {
+  type        = string
+  description = "RDS 마스터 사용자 이름"
+  default     = "${form.dbUsername}"
+}
+
+variable "rds_password" {
+  type        = string
+  description = "RDS 마스터 비밀번호"
+  sensitive   = true
+}
+
+variable "allowed_ip" {
+  type        = string
+  default     = "0.0.0.0/0"
+  description = "접근 허용할 IP 범위"
+}
+`;
+  };
+
+  // 코드 미리보기
   const codePreview = {
-    "main.tf": `terraform {
-  required_version = ">= 1.0.0"
-}
-provider "aws" {
-  region = "ap-northeast-2"
-}
-# ...`,
-    "vpc.tf": `resource "aws_vpc" "main" {
-  cidr_block = "${form.vpcCidr}"
-  # ...
-}`,
-    "ec2.tf": `resource "aws_instance" "web" {
-  ami           = "${form.ec2Ami}"
-  count         = ${form.ec2Count}
-  # ...
-}`,
-    "alb.tf": `resource "aws_lb" "main" {
-  name = "${form.albName}"
-  # ...
-}`,
-    "rds.tf": `resource "aws_db_instance" "main" {
-  engine         = "${form.rdsEngine}"
-  allocated_storage = ${form.rdsStorage}
-  # ...
-}`,
+    "main.tf": "// main.tf는 템플릿 그대로 업로드됩니다.",
+    "variables.tf": generateVariablesTf(),
   };
 
   // 입력값 변경 핸들러
   const handleChange = (field, value) => {
     setForm((prev) => ({ ...prev, [field]: value }));
+    setHighlightField(field);
+    setTimeout(() => setHighlightField(null), 1200);
   };
-  const handleNestedChange = (group, field, value) => {
-    setForm((prev) => ({
-      ...prev,
-      [group]: { ...prev[group], [field]: value },
-    }));
+
+  // 코드 하이라이트 처리 (간단)
+  const getHighlightedCode = (tabKey) => {
+    let code = codePreview[tabKey];
+    if (highlightField && tabKey === "variables.tf") {
+      code = code.replace(
+        new RegExp(`default\\s*=\\s*"?${form[highlightField]}"?`, "g"),
+        (match) => `<span class="highlight">${match}</span>`
+      );
+    }
+    return code;
+  };
+
+  // main.tf fetch 함수
+  const fetchMainTf = async () => {
+    const res = await fetch("/terraform/main.tf");
+    if (!res.ok) throw new Error("main.tf 템플릿을 불러올 수 없습니다.");
+    return await res.text();
+  };
+
+  // 파일 업로드 API 호출
+  const uploadFilesToGithub = async (mainTfContent, variablesTfContent) => {
+    const token = localStorage.getItem("access");
+    if (!token) {
+      alert("로그인이 필요합니다.");
+      return false;
+    }
+    const body = {
+      repo_name: gitRepo,
+      branch: "main",
+      commit_message: "terraform infra files upload",
+      files: [
+        { path: "main.tf", content: mainTfContent },
+        { path: "variables.tf", content: variablesTfContent },
+      ],
+    };
+    const res = await fetch("http://15.164.170.14:8000/github/upload-files/", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(body),
+    });
+    if (!res.ok) {
+      const msg = await res.text();
+      alert("파일 업로드 실패: " + msg);
+      return false;
+    }
+    return true;
+  };
+
+  // 배포하기 버튼 핸들러
+  const handleDeploy = async () => {
+    if (!gitRepo) {
+      alert("Git 레포 정보가 없습니다.");
+      return;
+    }
+    setLoading(true);
+    try {
+      const mainTf = await fetchMainTf();
+      const variablesTf = generateVariablesTf();
+      const ok = await uploadFilesToGithub(mainTf, variablesTf);
+      setLoading(false);
+      if (ok) {
+        alert("Terraform 파일이 깃허브에 업로드되었습니다!");
+        // 원하는 페이지로 이동
+        router.push("/dashboard/project");
+      }
+    } catch (e) {
+      setLoading(false);
+      alert("에러: " + e.message);
+    }
   };
 
   return (
     <Container>
       <Main>
-        <Title>프로젝트</Title>
-        <SubTitle>Projects &gt; Terraform Custom</SubTitle>
-
-        <TabRow>
-          <TabButton onClick={() => router.push("/dashboard/project")} active>
-            환경설정
-            <span
-              style={{
-                marginLeft: "0.5rem",
-                background: "#ede9fe",
-                color: "#7c3aed",
-                borderRadius: "9999px",
-                padding: "0 0.5rem",
-                fontSize: "0.75rem",
-              }}
-            >
-              25
-            </span>
-          </TabButton>
-          <TabButton onClick={() => router.push("/dashboard/project/architecture")} active>
-            아키텍처
-            <span
-              style={{
-                marginLeft: "0.5rem",
-                background: "#ede9fe",
-                color: "#7c3aed",
-                borderRadius: "9999px",
-                padding: "0 0.5rem",
-                fontSize: "0.75rem",
-              }}
-            >
-              8
-            </span>
-          </TabButton>
-          <TabButton disabled>
-            테라폼 커스텀
-            <span
-              style={{
-                marginLeft: "0.5rem",
-                background: "#ede9fe",
-                color: "#7c3aed",
-                borderRadius: "9999px",
-                padding: "0 0.5rem",
-                fontSize: "0.75rem",
-              }}
-            >
-              12
-            </span>
-          </TabButton>
-        </TabRow>
-
-        <Flex gap="2rem">
+        <Title>EC2 + RDS + ALB 커스텀 배포</Title>
+        <SubTitle>
+          주요 인프라 옵션을 선택하면, 아래 코드가 자동 생성되어 GitHub에 업로드됩니다.
+        </SubTitle>
+        <Flex>
           {/* 왼쪽: 입력 폼 */}
           <FormCard>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1.5rem" }}>
-              EC2 + RDS + ALB 커스텀 템플릿
+            <h2 style={{ fontSize: "1.15rem", fontWeight: "bold", marginBottom: "1.5rem" }}>
+              주요 배포 옵션
             </h2>
-            {/* VPC 설정 */}
             <Section>
-              <SectionTitle>VPC 설정</SectionTitle>
-              <Flex gap="0.5rem" mb="0.5rem">
-                <Input
-                  placeholder="VPC CIDR"
-                  value={form.vpcCidr}
-                  onChange={(e) => handleChange("vpcCidr", e.target.value)}
-                  w="50%"
-                />
-                <Input
-                  placeholder="서브넷 개수"
-                  type="number"
-                  value={form.vpcSubnetCount}
-                  onChange={(e) => handleChange("vpcSubnetCount", e.target.value)}
-                  w="50%"
-                />
-              </Flex>
-            </Section>
-            {/* EC2 설정 */}
-            <Section>
-              <SectionTitle>EC2 설정</SectionTitle>
-              <Input
-                placeholder="AMI (예: Ubuntu 20.04 LTS)"
-                value={form.ec2Ami}
-                onChange={(e) => handleChange("ec2Ami", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="EC2 인스턴스 이름"
-                value={form.ec2Name}
-                onChange={(e) => handleChange("ec2Name", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="인스턴스 개수"
-                type="number"
-                value={form.ec2Count}
-                onChange={(e) => handleChange("ec2Count", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="SSH 키 이름"
-                value={form.ec2SshKey}
-                onChange={(e) => handleChange("ec2SshKey", e.target.value)}
-                mb="0.5rem"
-              />
-              <Flex gap="1rem" mb="0.5rem">
-                <Label>
-                  <Checkbox
-                    checked={form.ec2Options.httpd}
-                    onChange={(e) => handleNestedChange("ec2Options", "httpd", e.target.checked)}
-                  />
-                  Apache 설치
-                </Label>
-                <Label>
-                  <Checkbox
-                    checked={form.ec2Options.docker}
-                    onChange={(e) => handleNestedChange("ec2Options", "docker", e.target.checked)}
-                  />
-                  Docker 설치
-                </Label>
-              </Flex>
-            </Section>
-            {/* ALB 설정 */}
-            <Section>
-              <SectionTitle>로드밸런서(ALB) 설정</SectionTitle>
-              <Input
-                placeholder="ALB 이름"
-                value={form.albName}
-                onChange={(e) => handleChange("albName", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="Target Group"
-                value={form.albTarget}
-                onChange={(e) => handleChange("albTarget", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="Health Check Path"
-                value={form.albHealth}
-                onChange={(e) => handleChange("albHealth", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="Path"
-                value={form.albPath}
-                onChange={(e) => handleChange("albPath", e.target.value)}
-                mb="0.5rem"
-              />
-              <Label mb="0.5rem">
-                <Checkbox
-                  checked={form.albHttps}
-                  onChange={(e) => handleChange("albHttps", e.target.checked)}
-                />
-                HTTPS 사용 (ACM 인증서 필요)
+              <Label>
+                EC2 인스턴스 타입
+                <Info>프리티어: t2.micro 권장</Info>
               </Label>
-            </Section>
-            {/* RDS 설정 */}
-            <Section>
-              <SectionTitle>RDS 설정</SectionTitle>
               <Select
-                value={form.rdsEngine}
-                onChange={(e) => handleChange("rdsEngine", e.target.value)}
+                value={form.ec2InstanceType}
+                onChange={(e) => handleChange("ec2InstanceType", e.target.value)}
               >
-                <option value="mysql">MySQL</option>
-                <option value="postgres">PostgreSQL</option>
+                <option value="t2.micro">t2.micro</option>
+                <option value="t3.micro">t3.micro</option>
+                <option value="t3.small">t3.small</option>
               </Select>
-              <Input
-                placeholder="DB 이름"
-                value={form.rdsName}
-                onChange={(e) => handleChange("rdsName", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="DB 사용자"
-                value={form.rdsUser}
-                onChange={(e) => handleChange("rdsUser", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="DB 비밀번호"
-                type="password"
-                value={form.rdsPassword}
-                onChange={(e) => handleChange("rdsPassword", e.target.value)}
-                mb="0.5rem"
-              />
-              <Input
-                placeholder="스토리지(GB)"
-                type="number"
-                value={form.rdsStorage}
-                onChange={(e) => handleChange("rdsStorage", e.target.value)}
-                mb="0.5rem"
-              />
-              <Flex gap="1rem" mb="0.5rem">
-                <Label>
-                  <Checkbox
-                    checked={form.rdsMultiAz}
-                    onChange={(e) => handleChange("rdsMultiAz", e.target.checked)}
-                  />
-                  Multi-AZ
-                </Label>
-                <Label>
-                  <Checkbox
-                    checked={form.rdsPublic}
-                    onChange={(e) => handleChange("rdsPublic", e.target.checked)}
-                  />
-                  퍼블릭 액세스 허용
-                </Label>
-              </Flex>
             </Section>
-            {/* 보안 설정 */}
             <Section>
-              <SectionTitle>보안 설정</SectionTitle>
-              <Flex gap="1rem">
+              <Label>
+                EC2 SSH 키페어 이름
+                <Info>EC2 콘솔에서 미리 생성 필요</Info>
+              </Label>
+              <Input
+                value={form.keyPairName || ""}
+                onChange={(e) => handleChange("keyPairName", e.target.value)}
+                placeholder="예: default-key"
+              />
+            </Section>
+            <Section>
+              <Label>
+                RDS DB 엔진
+                <Info>PostgreSQL 권장</Info>
+              </Label>
+              <div style={{ display: "flex", gap: "1rem" }}>
                 <Label>
-                  <Checkbox
-                    checked={form.securityOptions.allowHttp}
-                    onChange={(e) => handleNestedChange("securityOptions", "allowHttp", e.target.checked)}
+                  <input
+                    type="radio"
+                    name="dbEngine"
+                    value="postgres"
+                    checked={form.dbEngine === "postgres"}
+                    onChange={(e) => handleChange("dbEngine", e.target.value)}
                   />
-                  HTTP 허용
+                  PostgreSQL
                 </Label>
                 <Label>
-                  <Checkbox
-                    checked={form.securityOptions.allowHttps}
-                    onChange={(e) => handleNestedChange("securityOptions", "allowHttps", e.target.checked)}
+                  <input
+                    type="radio"
+                    name="dbEngine"
+                    value="mysql"
+                    checked={form.dbEngine === "mysql"}
+                    onChange={(e) => handleChange("dbEngine", e.target.value)}
                   />
-                  HTTPS 허용
+                  MySQL
                 </Label>
-                <Label>
-                  <Checkbox
-                    checked={form.securityOptions.allowSsh}
-                    onChange={(e) => handleNestedChange("securityOptions", "allowSsh", e.target.checked)}
-                  />
-                  SSH 허용
-                </Label>
-              </Flex>
+              </div>
+            </Section>
+            <Section>
+              <Label>
+                RDS DB 사용자명
+                <Info>admin 권장</Info>
+              </Label>
+              <Input
+                value={form.dbUsername}
+                onChange={(e) => handleChange("dbUsername", e.target.value)}
+                placeholder="예: admin"
+              />
+            </Section>
+            <Section>
+              <Label>
+                RDS DB 비밀번호
+                <Info>GitHub Secret에서 주입</Info>
+              </Label>
+              <Input
+                value={form.dbPassword || ""}
+                onChange={(e) => handleChange("dbPassword", e.target.value)}
+                placeholder="DB_PASSWORD"
+                type="password"
+              />
+            </Section>
+            <Section>
+              <Label>
+                RDS 스토리지(GB)
+                <Info>20~100GB 권장</Info>
+              </Label>
+              <Input
+                type="number"
+                min={20}
+                max={100}
+                value={form.dbStorage}
+                onChange={(e) => handleChange("dbStorage", e.target.value)}
+              />
+            </Section>
+            <Section>
+              <Label>
+                ALB Health Check 경로
+                <Info>기본값: /</Info>
+              </Label>
+              <Input
+                value={form.albHealthPath || "/"}
+                onChange={(e) => handleChange("albHealthPath", e.target.value)}
+                placeholder="/health"
+              />
             </Section>
           </FormCard>
           {/* 오른쪽: 코드 패널 */}
           <CodePanel>
             <CodeTabs>
-              {codeTabs.map((tab) => (
+              {["main.tf", "variables.tf"].map((tab) => (
                 <CodeTabButton
-                  key={tab.key}
-                  active={activeTab === tab.key}
-                  onClick={() => setActiveTab(tab.key)}
+                  key={tab}
+                  $active={activeTab === tab}
+                  onClick={() => setActiveTab(tab)}
                   type="button"
                 >
-                  {tab.label}
+                  {tab}
                 </CodeTabButton>
               ))}
             </CodeTabs>
             <CodeBox>
-              <CodePre>{codePreview[activeTab]}</CodePre>
+              <CodePre
+                dangerouslySetInnerHTML={{
+                  __html: getHighlightedCode(activeTab),
+                }}
+              />
             </CodeBox>
           </CodePanel>
         </Flex>
@@ -497,7 +453,9 @@ provider "aws" {
           <BottomButton onClick={() => router.push("/dashboard/project/architecture")}>
             이전
           </BottomButton>
-          <BottomButton primary>배포하기</BottomButton>
+          <BottomButton $primary onClick={handleDeploy} disabled={loading}>
+            {loading ? "업로드 중..." : "배포하기"}
+          </BottomButton>
         </BottomRow>
       </Main>
     </Container>
